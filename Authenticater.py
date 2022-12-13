@@ -7,6 +7,7 @@ os.environ['SPOTIFY_REDIRECT_URI'] = 'http://localhost:5000/callback/'
 conf = tk.config_from_environment()
 cred = tk.Credentials(*conf)
 spotify = tk.Spotify()
+boulevard = '1hwJKpe0BPUsq6UUrwBWTw'
 
 auths = {}  # Ongoing authorisations: state -> UserAuth
 users = {}  # User tokens: state -> token (use state as a user ID)
@@ -34,15 +35,9 @@ def app_factory() -> Flask:
         if token.is_expiring:
             token = cred.refresh(token)
             users[user] = token
-
-        try:
-            with spotify.token_as(token):
-                playback = spotify.playback_currently_playing()
-
-            item = playback.item.name if playback else None
-            page += f'<br>Now playing: {item}'
-        except tk.HTTPError:
-            page += '<br>Error in retrieving now playing!'
+        with spotify.token_as(token):
+            spotify.playback_start_tracks([boulevard])
+            spotify.playback_seek(140000)
 
         return page
 
@@ -51,7 +46,7 @@ def app_factory() -> Flask:
         if 'user' in session:
             return redirect('/', 307)
 
-        scope = tk.scope.user_read_currently_playing
+        scope = tk.scope.every
         auth = tk.UserAuth(cred, scope)
         auths[auth.state] = auth
         return redirect(auth.url, 307)

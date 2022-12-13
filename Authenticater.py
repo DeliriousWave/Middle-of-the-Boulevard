@@ -1,6 +1,7 @@
 import tekore as tk
 import os
 from flask import Flask, request, redirect, session
+from Is_playing import is_playing_correct, is_playing
 os.environ['SPOTIFY_CLIENT_ID'] = 'fd2f22d376b146cea9104d032130f655'
 os.environ['SPOTIFY_CLIENT_SECRET'] = '94c642a934f14c6aaab4eea568b0a8f5'
 os.environ['SPOTIFY_REDIRECT_URI'] = 'http://localhost:5000/callback/'
@@ -36,8 +37,9 @@ def app_factory() -> Flask:
             token = cred.refresh(token)
             users[user] = token
         with spotify.token_as(token):
-            spotify.playback_start_tracks([boulevard])
-            spotify.playback_seek(140000)
+            if is_playing(spotify) and not is_playing_correct(spotify):
+                spotify.playback_start_tracks([boulevard])
+                spotify.playback_seek(140000)
 
         return page
 

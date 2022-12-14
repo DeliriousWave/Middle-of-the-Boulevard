@@ -1,6 +1,8 @@
 def is_playing_correct(user):
     current = user.playback_currently_playing()
-    return current.item.name == 'Boulevard of Broken Dreams' and current.progress_ms > 100000
+    if current.item is None:
+        return True
+    return current.item.name == 'Boulevard of Broken Dreams' and current.progress_ms > 50000
 
 
 def is_playing(user):
